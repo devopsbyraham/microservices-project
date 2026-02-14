@@ -18,6 +18,7 @@ pipeline {
                     withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
                         sh "docker push rahamshaik/adservice:latest "
                     }
+
                 }
             }
         }
