@@ -2,19 +2,23 @@ pipeline {
     agent any
 
     stages {
-        stage('Deploy To Kubernetes') {
+        stage('Build & Tag Docker Image') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-rahamrrr', contextName: '', credentialsId: 'k8s-token', namespace: 'webapps', serverUrl: 'https://4AF1FCA2EF836606D3192716EF25E378.gr7.us-east-1.eks.amazonaws.com']]) {
-                    sh "kubectl apply -f deployment-service.yml"
-                    
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "docker build -t rahamshaik/adservice:latest ."
+                    }
                 }
             }
         }
         
-        stage('verify Deployment') {
+        stage('Push Docker Image') {
             steps {
-                withKubeCredentials(kubectlCredentials: [[caCertificate: '', clusterName: 'EKS-rahamrrr', contextName: '', credentialsId: 'k8s-token', namespace: 'webapps', serverUrl: 'https://4AF1FCA2EF836606D3192716EF25E378.gr7.us-east-1.eks.amazonaws.com']]) {
-                    sh "kubectl get svc -n webapps"
+                script {
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                        sh "docker push rahamshaik/adservice:latest "
+                    }
+
                 }
             }
         }
